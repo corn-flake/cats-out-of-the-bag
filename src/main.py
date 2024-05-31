@@ -102,69 +102,96 @@ class Player:
                 self.walkCyclePosition += 1
 
 class Cat:
-    standing = False
+    height = 64
+    width = 64
 
     up = False
     down = False
     left = False
     right = False
 
-    height = 64
-    width = 64
-
     walkUpSprites = [pygame.image.load(os.path.join(spritePath, "cat_sprites", "up_arrow.png"))]
     walkDownSprites = [pygame.image.load(os.path.join(spritePath, "cat_sprites", "down_arrow.png"))]
     walkRightSprites = [pygame.image.load(os.path.join(spritePath, "cat_sprites", "right_arrow.png"))]
     walkLeftSprites = [pygame.image.load(os.path.join(spritePath, "cat_sprites", "left_arrow.png"))]
 
-    velocity = 10
+    velocity = 5
 
     walkCyclePosition = 0
+
+    isAtEnd = False
     
-    def __init__(self, x, y):
+    def __init__(self, x, y, endX, endY):
         self.x = x
         self.y = y
-
+        self.startX = x
+        self.startY = y
+        self.endX = endX
+        self.endY = endY
 
     def draw(self, window):
-        if self.walkCyclePosition + 1 >= 0:
+        if self.isAtEnd:
+            if self.move(self.startX, self.startY):
+                self.isAtEnd = False
+        else:
+            self.isAtEnd = self.move(self.endX, self.endY)
+            
+        if self.walkCyclePosition + 1 <= 3:
             self.walkCyclePosition = 0
 
-        if not (self.standing):
-            if self.left:
-                window.blit(self.walkLeftSprites[self.walkCyclePosition // 3], (self.x, self.y))
-                self.walkCyclePosition += 1
-            elif self.right:
-                window.blit(self.walkRightSprites[self.walkCyclePosition // 3], (self.x, self.y))
-                self.walkCyclePosition += 1
-            elif self.up:
-                window.blit(self.walkUpSprites[self.walkCyclePosition // 3], (self.x, self.y))
-                self.walkCyclePosition += 1
-            else:
-                window.blit(self.walkDownSprites[self.walkCyclePosition // 3], (self.x, self.y))
-                self.walkCyclePosition += 1
+        if self.down:
+            window.blit(self.walkDownSprites[self.walkCyclePosition // 3], (self.x, self.y))
+            self.walkCyclePosition += 1
+        elif self.right:
+            window.blit(self.walkRightSprites[self.walkCyclePosition // 3], (self.x, self.y))
+            self.walkCyclePosition += 1
+        elif self.up:
+            window.blit(self.walkUpSprites[self.walkCyclePosition // 3], (self.x, self.y))
+            self.walkCyclePosition += 1
+        # Cat must be moving left
         else:
-            if self.left:
-                window.blit(self.walkLeftSprites[self.walkCyclePosition // 3], (self.x, self.y))
-                self.walkCyclePosition += 1
-            elif self.right:
-                window.blit(self.walkRightSprites[self.walkCyclePosition // 3], (self.x, self.y))
-                self.walkCyclePosition += 1
-            elif self.up:
-                window.blit(self.walkUpSprites[self.walkCyclePosition // 3], (self.x, self.y))
-                self.walkCyclePosition += 1
-            else:
-                window.blit(self.walkDownSprites[self.walkCyclePosition // 3], (self.x, self.y))
-                self.walkCyclePosition += 1
+            window.blit(self.walkLeftSprites[self.walkCyclePosition // 3], (self.x, self.y))
+            self.walkCyclePosition += 1
+            
 
-    
+    def move(self, endX, endY):
+        if self.x - self.velocity >= endX:
+            self.x -= self.velocity
+            self.left = True
+            self.right = False
+            self.up = False
+            self.down = False
+
+        elif self.x + self.width < endX:
+            self.x += self.velocity
+            self.left = False
+            self.right = True
+            self.up = False
+            self.down = False
+
+        elif self.y + self.height < endY: 
+            self.y += self.velocity
+            self.left = False
+            self.right = False
+            self.up = False 
+            self.down = True
+
+        elif self.y - self.velocity >= endY:
+            self.y -= self.velocity
+            self.left = False
+            self.right = False
+            self.up = True
+            self.down = False
+        else:
+            self.walkCyclePosition = 0
+            return True
+
 
 #---------------------Functions---------------------------#
 def redrawGameWindow():
     window.blit(backgroundImage, (0, 0))
 
     player.draw(window)
-
     for cat in cats:
         cat.draw(window)
 
@@ -175,16 +202,20 @@ def redrawGameWindow():
 player = Player(0, 0)
 
 cats = []
+<<<<<<< HEAD
 for i in range(4):
     cats.append(Cat(0, 0))
     cats[i].x = random.randint(0, screenWidth - cats[i].width)
     cats[i].y = random.randint(0, screenHeight - cats[i].height)
+=======
+for i in range(5):
+    cats.append(Cat(screenWidth // 2 , screenHeight // 2, random.randint(0, screenWidth), random.randint(0, screenHeight)))
+>>>>>>> b9c8048 (Add cat move function and delete unused code)
 
 # Load background image
 backgroundImage = pygame.image.load(os.path.join('..', 'bg.jpg'))
 
 clock = pygame.time.Clock()
-
 
 #---------------------Main Loop------------------------#
 run = True
@@ -193,13 +224,14 @@ run = True
 while run:
     # Set frame rate to 27 fps
     clock.tick(27)
-    
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
 
     keys = pygame.key.get_pressed()
 
+<<<<<<< HEAD
     # If W key is pressed and so on
     if keys[pygame.K_SPACE]:
         if player.left:
@@ -207,13 +239,14 @@ while run:
         else:
             facing = 1
 
+=======
+>>>>>>> b9c8048 (Add cat move function and delete unused code)
     if keys[pygame.K_a] and player.x - player.velocity >= 0:
         player.x -= player.velocity
         player.left = True
         player.right = False
         player.up = False
         player.down = False
-        player.standing = False
 
     elif keys[pygame.K_d] and player.x + player.width < screenWidth:
         player.x += player.velocity
@@ -221,7 +254,6 @@ while run:
         player.right = True
         player.up = False
         player.down = False
-        player.standing = False
 
     elif keys[pygame.K_s] and player.y + player.height < screenHeight:
         player.y += player.velocity
@@ -229,7 +261,6 @@ while run:
         player.right = False
         player.up = False 
         player.down = True
-        player.standing = False
 
     elif keys[pygame.K_w] and player.y - player.velocity >= 0:
         player.y -= player.velocity
@@ -237,11 +268,9 @@ while run:
         player.right = False
         player.up = True
         player.down = False
-        player.standing = False
 
     else:
         player.walkCyclePosition = 0
-        player.standing = True
 
     redrawGameWindow()
 
