@@ -24,7 +24,7 @@ import os
 import random
 import time
 
-#---------------------Global Variables and Game Window Setup-----------------------------#
+#---------------------Game Window Setup-----------------------------#
 spritePath = os.path.join('..', 'sprites')
 
 # This sets up the game window.
@@ -176,7 +176,9 @@ player = Player(0, 0)
 
 cats = []
 for i in range(4):
-    cats.append(Cat(random.randint(0, screenWidth), random.randint(0, screenHeight)))
+    cats.append(Cat(0, 0))
+    cats[i].x = random.randint(0, screenWidth - cats[i].width)
+    cats[i].y = random.randint(0, screenHeight - cats[i].height)
 
 # Load background image
 backgroundImage = pygame.image.load(os.path.join('..', 'bg.jpg'))
@@ -204,9 +206,6 @@ while run:
             facing = -1
         else:
             facing = 1
-
-        if len(bullets) < 5:
-            bullets.append(Projectile(round(player.x + player.width // 2), round(player.y + player.height // 2), 6, (255, 0, 0), facing))
 
     if keys[pygame.K_a] and player.x - player.velocity >= 0:
         player.x -= player.velocity
