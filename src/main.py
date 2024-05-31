@@ -17,9 +17,14 @@
 #    or write to the Free Software Foundation,
 #    Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
+
+#---------------------Import Libraries----------------------------#
 import pygame
 import os
+import random
+import time
 
+#---------------------Global Variables and Game Window Setup-----------------------------#
 spritePath = os.path.join('..', 'sprites')
 
 # This sets up the game window.
@@ -30,6 +35,7 @@ pygame.init()
 window = pygame.display.set_mode((screenWidth, screenHeight))
 pygame.display.set_caption("Cats Out of the Bag")
 
+#---------------------Game Object Classes----------------------------#
 class Player:
     def __init__(self, x, y):
         self.x = x
@@ -95,19 +101,6 @@ class Player:
                 window.blit(self.walkDownSprites[self.walkCyclePosition // 3], (self.x, self.y))
                 self.walkCyclePosition += 1
 
-
-class Projectile:
-    def __init__(self, x, y, radius, color, direction):
-        self.x = x
-        self.y = y
-        self.radius = radius
-        self.color = color
-        self.direction = direction
-        self.velocity = 8 * self.direction
-
-    def draw(self, window):
-        pygame.draw.circle(window, self.color, (self.x, self.y), self.radius)
-
 class Cat:
     standing = False
 
@@ -116,20 +109,25 @@ class Cat:
     left = False
     right = False
 
-    walkUpSprites = []
-    walkDownSprites = []
-    walkRightSprites = []
-    walkLeftSprites = []
+    height = 64
+    width = 64
 
-    velocity = 5
+    walkUpSprites = [pygame.image.load(os.path.join(spritePath, "cat_sprites", "up_arrow.png"))]
+    walkDownSprites = [pygame.image.load(os.path.join(spritePath, "cat_sprites", "down_arrow.png"))]
+    walkRightSprites = [pygame.image.load(os.path.join(spritePath, "cat_sprites", "right_arrow.png"))]
+    walkLeftSprites = [pygame.image.load(os.path.join(spritePath, "cat_sprites", "left_arrow.png"))]
+
+    velocity = 10
+
+    walkCyclePosition = 0
     
     def __init__(self, x, y):
         self.x = x
         self.y = y
 
 
-    def draw():
-        if self.walkCyclePosition + 1 >= 27:
+    def draw(self, window):
+        if self.walkCyclePosition + 1 >= 0:
             self.walkCyclePosition = 0
 
         if not (self.standing):
@@ -158,28 +156,35 @@ class Cat:
             else:
                 window.blit(self.walkDownSprites[self.walkCyclePosition // 3], (self.x, self.y))
                 self.walkCyclePosition += 1
+
     
-    
-player = Player(0, 0)
-bullets = []
 
-# Load background image
-backgroundImage = pygame.image.load(os.path.join('..', 'bg.jpg'))
-
-# Load player standing image
-
-clock = pygame.time.Clock()
-
+#---------------------Functions---------------------------#
 def redrawGameWindow():
     window.blit(backgroundImage, (0, 0))
 
     player.draw(window)
 
-    for bullet in bullets:
-        bullet.draw(window)
+    for cat in cats:
+        cat.draw(window)
 
     pygame.display.update()
 
+
+#---------------------Instantiate Game Objects, Background Images, and Game Clock-------------------------#
+player = Player(0, 0)
+
+cats = []
+for i in range(4):
+    cats.append(Cat(random.randint(0, screenWidth), random.randint(0, screenHeight)))
+
+# Load background image
+backgroundImage = pygame.image.load(os.path.join('..', 'bg.jpg'))
+
+clock = pygame.time.Clock()
+
+
+#---------------------Main Loop------------------------#
 run = True
 
 # Main loop
@@ -191,12 +196,6 @@ while run:
         if event.type == pygame.QUIT:
             run = False
 
-    for bullet in bullets:
-        if bullet.x < screenWidth and bullet.x > 0:
-            bullet.x += bullet.velocity
-        else:
-            bullets.remove(bullet)
-        
     keys = pygame.key.get_pressed()
 
     # If W key is pressed and so on
@@ -244,8 +243,6 @@ while run:
     else:
         player.walkCyclePosition = 0
         player.standing = True
-
-
 
     redrawGameWindow()
 
