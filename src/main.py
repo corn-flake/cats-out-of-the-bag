@@ -24,7 +24,7 @@ import os
 import random
 import time
 
-#---------------------Game Window Setup-----------------------------#
+#---------------------Global Variables and Game Window Setup-----------------------------#
 spritePath = os.path.join('..', 'sprites')
 
 # This sets up the game window.
@@ -202,15 +202,8 @@ def redrawGameWindow():
 player = Player(0, 0)
 
 cats = []
-<<<<<<< HEAD
-for i in range(4):
-    cats.append(Cat(0, 0))
-    cats[i].x = random.randint(0, screenWidth - cats[i].width)
-    cats[i].y = random.randint(0, screenHeight - cats[i].height)
-=======
 for i in range(5):
     cats.append(Cat(screenWidth // 2 , screenHeight // 2, random.randint(0, screenWidth), random.randint(0, screenHeight)))
->>>>>>> b9c8048 (Add cat move function and delete unused code)
 
 # Load background image
 backgroundImage = pygame.image.load(os.path.join('..', 'bg.jpg'))
@@ -231,16 +224,6 @@ while run:
 
     keys = pygame.key.get_pressed()
 
-<<<<<<< HEAD
-    # If W key is pressed and so on
-    if keys[pygame.K_SPACE]:
-        if player.left:
-            facing = -1
-        else:
-            facing = 1
-
-=======
->>>>>>> b9c8048 (Add cat move function and delete unused code)
     if keys[pygame.K_a] and player.x - player.velocity >= 0:
         player.x -= player.velocity
         player.left = True
