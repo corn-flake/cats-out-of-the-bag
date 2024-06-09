@@ -22,7 +22,6 @@
 import pygame
 import os
 import random
-import time
 
 #---------------------Global Variables and Game Window Setup-----------------------------#
 spritePath = os.path.join('..', 'sprites')
@@ -44,33 +43,34 @@ class Player:
         self.y = y
         self.hitbox = (self.x, self.y, self.width, self.height)
     
-    # These are the player's dimensions in pixels.
-    width = 64
-    height = 64
+        # These are the player's dimensions in pixels.
+        self.width = 64
+        self.height = 64
 
-    # This is how many pixels the player can move per frame.
-    velocity = 5
+        # This is how many pixels the player can move per frame.
+        self.velocity = 5
 
-    # These represent the direction the player is moving.
-    left = False
-    right = False
-    up = False
-    down = False
+        # These represent the direction the player is moving.
+        self.left = False
+        self.right = False
+        self.up = False
+        self.down = False
 
-    standing = True
-    # This represents an index in the walking sprites lists * 3 (why * 3, I don't know).
-    # You have to divide by 3 every time you access one of the sprite lists.
-    walkCyclePosition = 0
+        self.hitbox = (x, y, self.width, self.height)
 
-    walkUpSprites = [pygame.image.load(os.path.join(spritePath, "player_sprites", "up_arrow.png"))]
+        # This represents an index in the walking sprites lists * 3 (why * 3, I don't know).
+        # You have to divide by 3 every time you access one of the sprite lists.
+        self.walkCyclePosition = 0
 
-    walkDownSprites = [pygame.image.load(os.path.join(spritePath, "player_sprites", "down_arrow.png"))]
+        self.walkUpSprites = [pygame.image.load(os.path.join(spritePath, "player_sprites", "up_arrow.png"))]
 
-    # This is a list of sprites in the player's right walking cycle.
-    walkRightSprites = [pygame.image.load(os.path.join(spritePath, "player_sprites", "right_arrow.png"))]
+        self.walkDownSprites = [pygame.image.load(os.path.join(spritePath, "player_sprites", "down_arrow.png"))]
 
-    # This is a list of sprites in the player's left walking cycle.
-    walkLeftSprites = [pygame.image.load(os.path.join(spritePath, "player_sprites", "left_arrow.png"))]
+        # This is a list of sprites in the player's right walking cycle.
+        self.walkRightSprites = [pygame.image.load(os.path.join(spritePath, "player_sprites", "right_arrow.png"))]
+
+        # This is a list of sprites in the player's left walking cycle.
+        self.walkLeftSprites = [pygame.image.load(os.path.join(spritePath, "player_sprites", "left_arrow.png"))]
 
     lassoUpSprite = pygame.image.load(os.path.join(spritePath, "player_sprites", "lasso_up.png"))
     lassoDownSprite = pygame.image.load(os.path.join(spritePath, "player_sprites", "lasso_down.png"))
@@ -88,32 +88,20 @@ class Player:
         if self.walkCyclePosition + 1 >= 0:
             self.walkCyclePosition = 0
 
-        if not (self.standing):
-            if self.left:
-                window.blit(self.walkLeftSprites[self.walkCyclePosition // 3], (self.x, self.y))
-                self.walkCyclePosition += 1
-            elif self.right:
-                window.blit(self.walkRightSprites[self.walkCyclePosition // 3], (self.x, self.y))
-                self.walkCyclePosition += 1
-            elif self.up:
-                window.blit(self.walkUpSprites[self.walkCyclePosition // 3], (self.x, self.y))
-                self.walkCyclePosition += 1
-            else:
-                window.blit(self.walkDownSprites[self.walkCyclePosition // 3], (self.x, self.y))
-                self.walkCyclePosition += 1
+        if self.left:
+            window.blit(self.walkLeftSprites[self.walkCyclePosition // 3], (self.x, self.y))
+            self.walkCyclePosition += 1
+        elif self.right:
+            window.blit(self.walkRightSprites[self.walkCyclePosition // 3], (self.x, self.y))
+            self.walkCyclePosition += 1
+        elif self.up:
+            window.blit(self.walkUpSprites[self.walkCyclePosition // 3], (self.x, self.y))
+            self.walkCyclePosition += 1
         else:
-            if self.left:
-                window.blit(self.walkLeftSprites[self.walkCyclePosition // 3], (self.x, self.y))
-                self.walkCyclePosition += 1
-            elif self.right:
-                window.blit(self.walkRightSprites[self.walkCyclePosition // 3], (self.x, self.y))
-                self.walkCyclePosition += 1
-            elif self.up:
-                window.blit(self.walkUpSprites[self.walkCyclePosition // 3], (self.x, self.y))
-                self.walkCyclePosition += 1
-            else:
-                window.blit(self.walkDownSprites[self.walkCyclePosition // 3], (self.x, self.y))
-                self.walkCyclePosition += 1
+            window.blit(self.walkDownSprites[self.walkCyclePosition // 3], (self.x, self.y))
+            self.walkCyclePosition += 1
+        self.hitbox = (self.x, self.y, self.width, self.height)
+        pygame.draw.rect(window, (255, 0, 0), self.hitbox, 2);
 
         self.hitbox = (self.x, self.y, self.width, self.height)
         pygame.draw.rect(window, (255, 0, 0), self.hitbox, 2)
@@ -141,25 +129,6 @@ class Player:
 
 
 class Cat:
-    height = 64
-    width = 64
-
-    up = False
-    down = False
-    left = False
-    right = False
-
-    walkUpSprites = [pygame.image.load(os.path.join(spritePath, "cat_sprites", "up_arrow.png"))]
-    walkDownSprites = [pygame.image.load(os.path.join(spritePath, "cat_sprites", "down_arrow.png"))]
-    walkRightSprites = [pygame.image.load(os.path.join(spritePath, "cat_sprites", "right_arrow.png"))]
-    walkLeftSprites = [pygame.image.load(os.path.join(spritePath, "cat_sprites", "left_arrow.png"))]
-
-    velocity = 5
-
-    walkCyclePosition = 0
-
-    isAtEnd = False
-    
     def __init__(self, x, y, endX, endY):
         self.x = x
         self.y = y
@@ -168,6 +137,28 @@ class Cat:
         self.endX = endX
         self.endY = endY
         self.hitbox = (self.x, self.y, self.width, self.height)
+
+        self.height = 64
+        self.width = 64
+
+        self.hitbox = (x, y, self.width, self.height)
+
+        self.up = False
+        self.down = False
+        self.left = False
+        self.right = False
+
+        self.walkUpSprites = [pygame.image.load(os.path.join(spritePath, "cat_sprites", "up_arrow.png"))]
+        self.walkDownSprites = [pygame.image.load(os.path.join(spritePath, "cat_sprites", "down_arrow.png"))]
+        self.walkRightSprites = [pygame.image.load(os.path.join(spritePath, "cat_sprites", "right_arrow.png"))]
+        self.walkLeftSprites = [pygame.image.load(os.path.join(spritePath, "cat_sprites", "left_arrow.png"))]
+
+        self.velocity = 5
+
+        self.walkCyclePosition = 0
+
+        self.isAtEnd = False
+    
 
     def draw(self, window):
         if self.isAtEnd:
@@ -192,9 +183,15 @@ class Cat:
         else:
             window.blit(self.walkLeftSprites[self.walkCyclePosition // 3], (self.x, self.y))
             self.walkCyclePosition += 1
+<<<<<<< HEAD
 
         self.hitbox = (self.x, self.y, self.width, self.height)
         pygame.draw.rect(window, (255, 0, 0), self.hitbox, 2)
+=======
+        self.hitbox = (self.x, self.y, self.width, self.height)
+        pygame.draw.rect(window, (255, 0, 0), self.hitbox, 2)
+        
+>>>>>>> dfcc7942affd64bf6b63894a776d5f5e316f112e
             
 
     def move(self, endX, endY):
@@ -233,6 +230,10 @@ class Cat:
             self.walkCyclePosition = 0
             return True
 
+    def hit(self):
+        print("hit")
+        pass
+
 
     def hit(self):
         print("hit")
@@ -249,12 +250,21 @@ def redrawGameWindow():
     window.blit(backgroundImage, (0, 0))
 
     player.draw(window)
+<<<<<<< HEAD
     for cat in cats:
 
         if areColliding(player, cat):
             cat.hit()
             cats.remove(cat)
 
+=======
+    for i, cat in enumerate(cats):
+
+        if abs(player.x - cat.x) < 64 and abs(player.y - cat.y) < 64:
+            print(f"Cat {i}")
+            cat.hit()
+        
+>>>>>>> dfcc7942affd64bf6b63894a776d5f5e316f112e
         cat.draw(window)
 
     pygame.display.update()
