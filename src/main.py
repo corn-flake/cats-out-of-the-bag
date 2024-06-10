@@ -41,11 +41,12 @@ class Player:
     def __init__(self, x, y):
         self.x = x
         self.y = y
-        self.hitbox = (self.x, self.y, self.width, self.height)
     
         # These are the player's dimensions in pixels.
         self.width = 64
         self.height = 64
+
+        self.hitbox = (self.x, self.y, self.width, self.height)
 
         # This is how many pixels the player can move per frame.
         self.velocity = 5
@@ -72,16 +73,10 @@ class Player:
         # This is a list of sprites in the player's left walking cycle.
         self.walkLeftSprites = [pygame.image.load(os.path.join(spritePath, "player_sprites", "left_arrow.png"))]
 
-    lassoUpSprite = pygame.image.load(os.path.join(spritePath, "player_sprites", "lasso_up.png"))
-    lassoDownSprite = pygame.image.load(os.path.join(spritePath, "player_sprites", "lasso_down.png"))
-    lassoLeftSprite = pygame.image.load(os.path.join(spritePath, "player_sprites", "lasso_left.png"))
-    lassoRightSprite = pygame.image.load(os.path.join(spritePath, "player_sprites", "lasso_right.png"))
+        self.lassoIsThrown = False
 
-    lassoCounter = 0
-    lassoCounterMax = 20
-    lassoSpriteWidth = 64
-    lassoSpriteHeight = 64
-    lassoIsThrown = False
+        self.lasso = Lasso(x, y)
+
 
     # This draws the player on the screen
     def draw(self, window):
@@ -107,26 +102,57 @@ class Player:
         pygame.draw.rect(window, (255, 0, 0), self.hitbox, 2)
 
         if self.lassoIsThrown:
-            if self.left:
-                window.blit(self.lassoLeftSprite, (self.x - self.lassoSpriteWidth, self.y))
-            elif self.right:
-                window.blit(self.lassoRightSprite, (self.x + self.width, self.y))
-            elif self.up:
-                window.blit(self.lassoUpSprite, (self.x, self.y - self.lassoSpriteHeight))
-            else:
-                window.blit(self.lassoDownSprite, (self.x, self.y + self.height))
+            self.lasso.counter -= 1
 
-            if self.lassoCounter > 1:
-                self.lassoCounter -= 1
-            else:
-                self.lassoCounter = 0
-                self.lassoIsThrown = False
+        if self.lasso.counter == 0:
+            self.lassoIsThrown = False
+        else:
+            self.throwLasso(window)
+
 
     def throwLasso(self, window):
-        self.lassoCounter = self.lassoCounterMax
-        self.lassoIsThrown = True
-        
+        if self.left:
+            lassoX = self.x - self.lasso.spriteWidth
+            lassoY = self.y
+            self.lasso.x = lassoX
+            self.lasso.y = lassoY
+            self.lasso.left = True
+            self.lasso.right = False
+            self.lasso.up = False
+            self.lasso.down = False
+        elif self.right:
+            lassoX = self.x + self.width
+            lassoY = self.y
+            self.lasso.x = lassoX
+            self.lasso.y = lassoY
+            self.lasso.right = True
+            self.lasso.left = False
+            self.lasso.up = False
+            self.lasso.down = False
+        elif self.up:
+            lassoX = self.x
+            lassoY = self.y - self.lasso.spriteHeight
+            self.lasso.x = lassoX
+            self.lasso.y = lassoY
+            self.lasso.up = True
+            self.lasso.down = False
+            self.lasso.right = False
+            self.lasso.left = False
+        else:
+            lassoX = self.x
+            lassoY = self.y + self.height
+            self.lasso.x = lassoX
+            self.lasso.y = lassoY
+            self.lasso.down = True
+            self.lasso.up = False
+            self.lasso.right = False
+            self.lasso.left = False
 
+        self.lasso.draw(window)
+
+        if not self.lassoIsThrown:
+            self.lassoIsThrown = True
+            self.lasso.counter = self.lasso.counterMax
 
 class Cat:
     def __init__(self, x, y, endX, endY):
@@ -136,10 +162,10 @@ class Cat:
         self.startY = y
         self.endX = endX
         self.endY = endY
-        self.hitbox = (self.x, self.y, self.width, self.height)
 
         self.height = 64
         self.width = 64
+
 
         self.hitbox = (x, y, self.width, self.height)
 
@@ -183,16 +209,10 @@ class Cat:
         else:
             window.blit(self.walkLeftSprites[self.walkCyclePosition // 3], (self.x, self.y))
             self.walkCyclePosition += 1
-<<<<<<< HEAD
 
         self.hitbox = (self.x, self.y, self.width, self.height)
         pygame.draw.rect(window, (255, 0, 0), self.hitbox, 2)
-=======
-        self.hitbox = (self.x, self.y, self.width, self.height)
-        pygame.draw.rect(window, (255, 0, 0), self.hitbox, 2)
         
->>>>>>> dfcc7942affd64bf6b63894a776d5f5e316f112e
-            
 
     def move(self, endX, endY):
         if self.x - self.velocity >= endX:
@@ -235,36 +255,63 @@ class Cat:
         pass
 
 
-    def hit(self):
-        print("hit")
-        pass
+class Lasso:
 
+    def __init__(self, x, y):
+        self.x = 0
+        self.y = 0
+
+        self.upSprite = pygame.image.load(os.path.join(spritePath, "player_sprites", "lasso_up.png"))
+        self.downSprite = pygame.image.load(os.path.join(spritePath, "player_sprites", "lasso_down.png"))
+        self.leftSprite = pygame.image.load(os.path.join(spritePath, "player_sprites", "lasso_left.png"))
+        self.rightSprite = pygame.image.load(os.path.join(spritePath, "player_sprites", "lasso_right.png"))
+
+        self.counter = 0
+        self.counterMax = 20
+        self.spriteWidth = 64
+        self.spriteHeight = 64
+
+        self.up = False
+        self.down = False
+        self.left = False
+        self.right = False
+
+        
+    def draw(self, window):
+        if self.up:
+            window.blit(self.upSprite, (self.x, self.y))
+        elif self.down:
+            window.blit(self.downSprite, (self.x, self.y))
+        elif self.left:
+            window.blit(self.leftSprite, (self.x, self.y))
+        else:
+            window.blit(self.rightSprite, (self.x, self.y))
+
+        
+
+
+    
 
 #---------------------Functions---------------------------#
 
 def areColliding(player, cat) -> bool:
-    return player.y < cat.y + cat.height and player.y + player.height > cat.y and player.x + player.width > cat.x and player.x < cat.x + cat.width
+    if not player.lassoIsThrown:
+        return False
+    else:
+        return player.lasso.y < cat.y + cat.height and player.lasso.y + player.lasso.spriteHeight > cat.y and player.lasso.x + player.lasso.spriteWidth > cat.x and player.lasso.x < cat.x + cat.width
 
 
 def redrawGameWindow():
     window.blit(backgroundImage, (0, 0))
 
     player.draw(window)
-<<<<<<< HEAD
+
     for cat in cats:
 
         if areColliding(player, cat):
             cat.hit()
             cats.remove(cat)
 
-=======
-    for i, cat in enumerate(cats):
-
-        if abs(player.x - cat.x) < 64 and abs(player.y - cat.y) < 64:
-            print(f"Cat {i}")
-            cat.hit()
-        
->>>>>>> dfcc7942affd64bf6b63894a776d5f5e316f112e
         cat.draw(window)
 
     pygame.display.update()
