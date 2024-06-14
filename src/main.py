@@ -261,10 +261,30 @@ class Lasso:
         self.x = 0
         self.y = 0
 
-        self.upSprite = pygame.image.load(os.path.join(spritePath, "player_sprites", "lasso_up.png"))
-        self.downSprite = pygame.image.load(os.path.join(spritePath, "player_sprites", "lasso_down.png"))
-        self.leftSprite = pygame.image.load(os.path.join(spritePath, "player_sprites", "lasso_left.png"))
-        self.rightSprite = pygame.image.load(os.path.join(spritePath, "player_sprites", "lasso_right.png"))
+        self.upSprites = [pygame.image.load(os.path.join(spritePath, "lasso_sprites", "lasso_up1.png")),
+                          pygame.image.load(os.path.join(spritePath, "lasso_sprites", "lasso_up2.png")),
+                          pygame.image.load(os.path.join(spritePath, "lasso_sprites", "lasso_up3.png")),
+                          pygame.image.load(os.path.join(spritePath, "lasso_sprites", "lasso_up4.png")),
+                          pygame.image.load(os.path.join(spritePath, "lasso_sprites", "lasso_up5.png"))]
+
+        self.downSprites = [pygame.image.load(os.path.join(spritePath, "lasso_sprites", "lasso_down1.png")),
+                            pygame.image.load(os.path.join(spritePath, "lasso_sprites", "lasso_down2.png")),
+                            pygame.image.load(os.path.join(spritePath, "lasso_sprites", "lasso_down3.png")),
+                            pygame.image.load(os.path.join(spritePath, "lasso_sprites", "lasso_down4.png")),
+                            pygame.image.load(os.path.join(spritePath, "lasso_sprites", "lasso_down5.png"))]
+
+        self.leftSprites = [pygame.image.load(os.path.join(spritePath, "lasso_sprites", "lasso_left1.png")),
+                            pygame.image.load(os.path.join(spritePath, "lasso_sprites", "lasso_left2.png")),
+                            pygame.image.load(os.path.join(spritePath, "lasso_sprites", "lasso_left3.png")),
+                            pygame.image.load(os.path.join(spritePath, "lasso_sprites", "lasso_left4.png")),
+                            pygame.image.load(os.path.join(spritePath, "lasso_sprites", "lasso_left5.png"))]
+
+        self.rightSprites = [pygame.image.load(os.path.join(spritePath, "lasso_sprites", "lasso_right1.png")),
+                            pygame.image.load(os.path.join(spritePath, "lasso_sprites", "lasso_right2.png")),
+                            pygame.image.load(os.path.join(spritePath, "lasso_sprites", "lasso_right3.png")),
+                            pygame.image.load(os.path.join(spritePath, "lasso_sprites", "lasso_right4.png")),
+                            pygame.image.load(os.path.join(spritePath, "lasso_sprites", "lasso_right5.png"))]
+
 
         self.counter = 0
         self.counterMax = 20
@@ -278,14 +298,41 @@ class Lasso:
 
         
     def draw(self, window):
+        # I want to use the counter to index into the sprite lists, but it's counting down and I want it to count up
+        # This lookup table uses the counter as an index and stores the value I want from 20 -> 0, 19 -> 1, 18 -> 2, etc.
+        # It changes the counter which is counting down to counting up
+        numberSwapLookupTable = [19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+
+        # Then we can integer divide by 4 so that we get 4 of the same number in the correct order like this:
+        # 0 -> 0
+        # 1 -> 0
+        # 2 -> 0
+        # 3 -> 0
+        # 4 -> 1
+        # 5 -> 1
+        # ...
+        # The final number is correct index into the sprite lists
+        currentImageIndex = numberSwapLookupTable[self.counter - 1] // 4
+
         if self.up:
-            window.blit(self.upSprite, (self.x, self.y))
+            window.blit(self.upSprites[currentImageIndex], (self.x, self.y))
+            self.spriteWidth = 64
+            self.spriteHeight = (currentImageIndex + 1) * 21
         elif self.down:
-            window.blit(self.downSprite, (self.x, self.y))
+            window.blit(self.downSprites[currentImageIndex], (self.x, self.y))
+            self.spriteWidth = 64
+            self.spriteHeight = (currentImageIndex + 1) * 21
         elif self.left:
-            window.blit(self.leftSprite, (self.x, self.y))
+            self.spriteWidth = (currentImageIndex + 1) * 21
+            self.spriteHeight = 64
+            window.blit(self.leftSprites[currentImageIndex], (self.x, self.y))
         else:
-            window.blit(self.rightSprite, (self.x, self.y))
+            window.blit(self.rightSprites[currentImageIndex], (self.x, self.y))
+            self.spriteWidth = (currentImageIndex + 1) * 21
+            self.spriteHeight = 64
+
+        
+
 
         
 
