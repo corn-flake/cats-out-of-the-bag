@@ -184,14 +184,10 @@ class Cat:
         self.walkCyclePosition = 0
 
         self.isAtEnd = False
-    
+
+        self.isCaught = False
 
     def draw(self, window):
-        if self.isAtEnd:
-            if self.move(self.startX, self.startY):
-                self.isAtEnd = False
-        else:
-            self.isAtEnd = self.move(self.endX, self.endY)
             
         if self.walkCyclePosition + 1 <= 3:
             self.walkCyclePosition = 0
@@ -215,44 +211,62 @@ class Cat:
         
 
     def move(self, endX, endY):
-        if self.x - self.velocity >= endX:
-            self.x -= self.velocity
-            self.left = True
-            self.right = False
-            self.up = False
-            self.down = False
-            return False
+        if self.isAtEnd:
+           # The cat is at the end of it's path.
+           # It needs to go back to the start, so we can swap the starts and ends
+            temp = self.startX
+            self.startX = self.endX
+            self.endX = temp
 
-        elif self.x + self.width < endX:
-            self.x += self.velocity
-            self.left = False
-            self.right = True
-            self.up = False
-            self.down = False
-            return False
-
-        elif self.y + self.height < endY: 
-            self.y += self.velocity
-            self.left = False
-            self.right = False
-            self.up = False 
-            self.down = True
-            return False
-
-        elif self.y - self.velocity >= endY:
-            self.y -= self.velocity
-            self.left = False
-            self.right = False
-            self.up = True
-            self.down = False
-            return False
+            temp = self.startY
+            self.startY = self.endY
+            self.endY = temp
+            self.isAtEnd = False
         else:
-            self.walkCyclePosition = 0
-            return True
+            if self.x - self.velocity >= endX:
+                self.x -= self.velocity
+                self.left = True
+                self.right = False
+                self.up = False
+                self.down = False
+                self.isAtEnd = False
+
+            elif self.x + self.width < endX:
+                self.x += self.velocity
+                self.left = False
+                self.right = True
+                self.up = False
+                self.down = False
+                self.isAtEnd = False
+
+            elif self.y + self.height < endY: 
+                self.y += self.velocity
+                self.left = False
+                self.right = False
+                self.up = False 
+                self.down = True
+                self.isAtEnd = False
+
+            elif self.y - self.velocity >= endY:
+                self.y -= self.velocity
+                self.left = False
+                self.right = False
+                self.up = True
+                self.down = False
+                self.isAtEnd = False
+
+            else:
+                self.walkCyclePosition = 0
+                self.isAtEnd = True
 
     def hit(self):
-        print("hit")
-        pass
+        print("caught")
+
+    def pullTowardPlayer(self, player):
+        self.endX = player.x
+        self.endY = player.y
+        self.velocity = player.velocity + 3
+        
 
 
 class Lasso:
@@ -332,16 +346,14 @@ class Lasso:
             self.spriteHeight = 64
 
         
-
-
-        
-
-
     
 
 #---------------------Functions---------------------------#
 
-def areColliding(player, cat) -> bool:
+def catIsTouchingPlayer(player, cat):
+    return player.y <= cat.y + cat.height and player.y + player.height >= cat.y and player.x + player.width >= cat.x and player.x <= cat.x + cat.width
+
+def playerCaughtCat(player, cat) -> bool:
     if not player.lassoIsThrown:
         return False
     else:
@@ -355,11 +367,18 @@ def redrawGameWindow():
 
     for cat in cats:
 
-        if areColliding(player, cat):
+        if playerCaughtCat(player, cat):
             cat.hit()
-            cats.remove(cat)
+            cat.isCaught = True
+
+        if cat.isCaught:
+            if catIsTouchingPlayer(player, cat):
+                cats.remove(cat)
+            else:
+                cat.pullTowardPlayer(player)
 
         cat.draw(window)
+        cat.move(cat.endX, cat.endY)
 
     pygame.display.update()
 
