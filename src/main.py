@@ -208,7 +208,14 @@ class Cat:
 
         self.hitbox = (self.x, self.y, self.width, self.height)
         pygame.draw.rect(window, (255, 0, 0), self.hitbox, 2)
+<<<<<<< HEAD
         
+=======
+        self.hitbox = (self.x, self.y, self.width, self.height)
+        pygame.draw.rect(window, (255, 0, 0), self.hitbox, 2)
+        
+            
+>>>>>>> d2ea21a (Delete artifacts from merge conflict)
 
     def move(self, endX, endY):
         if self.isAtEnd:
