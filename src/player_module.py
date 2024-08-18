@@ -21,73 +21,26 @@
 import pygame
 import os
 
+import movable_class
 import lasso_module
 
-spritePath = os.path.join('..', 'sprites')
+spritePath = os.path.join('..', 'sprites', 'player_sprites')
 
-class Player:
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
-    
-        # These are the player's dimensions in pixels.
-        self.width = 64
-        self.height = 64
 
-        self.hitbox = (self.x, self.y, self.width, self.height)
-
-        # This is how many pixels the player can move per frame.
-        self.velocity = 5
-
-        # These represent the direction the player is moving.
-        self.left = False
-        self.right = False
-        self.up = False
-        self.down = False
-
-        self.hitbox = (x, y, self.width, self.height)
-
-        # This represents an index in the walking sprites lists * 3 (why * 3, I don't know).
-        # You have to divide by 3 every time you access one of the sprite lists.
-        self.walkCyclePosition = 0
-
-        self.walkUpSprites = [pygame.image.load(os.path.join(spritePath, "player_sprites", "up_arrow.png"))]
-
-        self.walkDownSprites = [pygame.image.load(os.path.join(spritePath, "player_sprites", "down_arrow.png"))]
-
-        # This is a list of sprites in the player's right walking cycle.
-        self.walkRightSprites = [pygame.image.load(os.path.join(spritePath, "player_sprites", "right_arrow.png"))]
-
-        # This is a list of sprites in the player's left walking cycle.
-        self.walkLeftSprites = [pygame.image.load(os.path.join(spritePath, "player_sprites", "left_arrow.png"))]
+class Player(movable_class.Movable):
+    def __init__(self, x: int, y: int) -> None:
+        super().__init__(x, y, 64, 64, 5,
+                         [[os.path.join(spritePath, "left_arrow.png")],
+                          [os.path.join(spritePath, "right_arrow.png")],
+                          [os.path.join(spritePath, "up_arrow.png")],
+                          [os.path.join(spritePath, "down_arrow.png")]])
 
         self.lassoIsThrown = False
-
         self.lasso = lasso_module.Lasso(x, y)
-
 
     # This draws the player on the screen
     def draw(self, window):
-        if self.walkCyclePosition + 1 >= 0:
-            self.walkCyclePosition = 0
-
-        if self.left:
-            window.blit(self.walkLeftSprites[self.walkCyclePosition // 3], (self.x, self.y))
-            self.walkCyclePosition += 1
-        elif self.right:
-            window.blit(self.walkRightSprites[self.walkCyclePosition // 3], (self.x, self.y))
-            self.walkCyclePosition += 1
-        elif self.up:
-            window.blit(self.walkUpSprites[self.walkCyclePosition // 3], (self.x, self.y))
-            self.walkCyclePosition += 1
-        else:
-            window.blit(self.walkDownSprites[self.walkCyclePosition // 3], (self.x, self.y))
-            self.walkCyclePosition += 1
-        self.hitbox = (self.x, self.y, self.width, self.height)
-        pygame.draw.rect(window, (255, 0, 0), self.hitbox, 2);
-
-        self.hitbox = (self.x, self.y, self.width, self.height)
-        pygame.draw.rect(window, (255, 0, 0), self.hitbox, 2)
+        super().draw(window)
 
         if self.lassoIsThrown:
             self.lasso.counter -= 1
@@ -96,7 +49,6 @@ class Player:
             self.lassoIsThrown = False
         else:
             self.throwLasso(window)
-
 
     def throwLasso(self, window):
         if self.left:
@@ -142,8 +94,7 @@ class Player:
             self.lassoIsThrown = True
             self.lasso.counter = self.lasso.counterMax
 
-            
-    def caughtCat(self, cat) -> bool:
+    def caught_cat(self, cat) -> bool:
         if not self.lassoIsThrown:
             return False
         else:

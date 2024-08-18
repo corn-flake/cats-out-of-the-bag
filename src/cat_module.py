@@ -21,125 +21,75 @@
 import pygame
 import os
 
+import movable_class
+
 spritePath = os.path.join('..', 'sprites')
 
-class Cat:
+
+class Cat(movable_class.Movable):
     def __init__(self, x, y, endX, endY):
-        self.x = x
-        self.y = y
-        self.startX = x
-        self.startY = y
-        self.endX = endX
-        self.endY = endY
+        super().__init__(x, y, 64, 64, 5, [[os.path.join(spritePath, "cat_sprites", "left_arrow.png")],
+                                           [os.path.join(spritePath, "cat_sprites", "right_arrow.png")],
+                                           [os.path.join(spritePath, "cat_sprites", "up_arrow.png")],
+                                           [os.path.join(spritePath, "cat_sprites", "down_arrow.png")]])
 
-        self.height = 64
-        self.width = 64
-
-
-        self.hitbox = (x, y, self.width, self.height)
-
-        self.up = False
-        self.down = False
-        self.left = False
-        self.right = False
-
-        self.walkUpSprites = [pygame.image.load(os.path.join(spritePath, "cat_sprites", "up_arrow.png"))]
-        self.walkDownSprites = [pygame.image.load(os.path.join(spritePath, "cat_sprites", "down_arrow.png"))]
-        self.walkRightSprites = [pygame.image.load(os.path.join(spritePath, "cat_sprites", "right_arrow.png"))]
-        self.walkLeftSprites = [pygame.image.load(os.path.join(spritePath, "cat_sprites", "left_arrow.png"))]
-
-        self.velocity = 5
-
-        self.walkCyclePosition = 0
-
-        self.isAtEnd = False
+        self.start_x = x
+        self.start_y = y
+        self.end_x = endX
+        self.end_y = endY
 
         self.isCaught = False
 
     def draw(self, window):
-            
-        if self.walkCyclePosition + 1 <= 3:
-            self.walkCyclePosition = 0
+        super().draw(window)
 
-        if self.down:
-            window.blit(self.walkDownSprites[self.walkCyclePosition // 3], (self.x, self.y))
-            self.walkCyclePosition += 1
-        elif self.right:
-            window.blit(self.walkRightSprites[self.walkCyclePosition // 3], (self.x, self.y))
-            self.walkCyclePosition += 1
-        elif self.up:
-            window.blit(self.walkUpSprites[self.walkCyclePosition // 3], (self.x, self.y))
-            self.walkCyclePosition += 1
-        # Cat must be moving left
-        else:
-            window.blit(self.walkLeftSprites[self.walkCyclePosition // 3], (self.x, self.y))
-            self.walkCyclePosition += 1
+    def advance_on_path(self) -> None:
+        x_range_to_stop_in = range(self.end_x - self.speed, self.end_x + self.speed + 1)
+        y_range_to_stop_in = range(self.end_y - self.speed, self.end_y + self.speed + 1)
 
-        self.hitbox = (self.x, self.y, self.width, self.height)
-        pygame.draw.rect(window, (255, 0, 0), self.hitbox, 2)
-        
-        self.hitbox = (self.x, self.y, self.width, self.height)
-        pygame.draw.rect(window, (255, 0, 0), self.hitbox, 2)
-        
+        # This checks to see whether the cat is at the end / is about to pass it with the next move
+        # It returns because the function just needs to switch the variables if the cat is at the end, nothing else
+        if self.x in x_range_to_stop_in and self.y in y_range_to_stop_in:
+            temp = self.start_x
+            self.start_x = self.end_x
+            self.end_x = temp
 
-    def move(self, endX, endY):
-        if self.isAtEnd:
-           # The cat is at the end of it's path.
-           # It needs to go back to the start, so we can swap the starts and ends
-            temp = self.startX
-            self.startX = self.endX
-            self.endX = temp
+            temp = self.start_y
+            self.start_y = self.end_y
+            self.end_y = temp
+            return
 
-            temp = self.startY
-            self.startY = self.endY
-            self.endY = temp
-            self.isAtEnd = False
-        else:
-            if self.x - self.velocity >= endX:
-                self.x -= self.velocity
-                self.left = True
-                self.right = False
-                self.up = False
-                self.down = False
-                self.isAtEnd = False
-
-            elif self.x + self.width < endX:
-                self.x += self.velocity
-                self.left = False
-                self.right = True
-                self.up = False
-                self.down = False
-                self.isAtEnd = False
-
-            elif self.y + self.height < endY: 
-                self.y += self.velocity
-                self.left = False
-                self.right = False
-                self.up = False 
-                self.down = True
-                self.isAtEnd = False
-
-            elif self.y - self.velocity >= endY:
-                self.y -= self.velocity
-                self.left = False
-                self.right = False
-                self.up = True
-                self.down = False
-                self.isAtEnd = False
-
+        elif self.x in x_range_to_stop_in:
+            if self.y > y_range_to_stop_in[len(y_range_to_stop_in) - 1]:
+                self.face("up")
             else:
-                self.walkCyclePosition = 0
-                self.isAtEnd = True
+                self.face("down")
+
+        elif self.y in y_range_to_stop_in:
+            if self.x > x_range_to_stop_in[len(x_range_to_stop_in) - 1]:
+                self.face("left")
+            else:
+                self.face("right")
+
+        else:
+            if self.x > x_range_to_stop_in[len(x_range_to_stop_in) - 1]:
+                self.face("left")
+            else:
+                self.face("right")
+
+        self.move_forward()
+        return
 
     def hit(self):
         print("caught")
 
-    def pullTowardPlayer(self, player):
+    def pull_toward_player(self, player):
         self.endX = player.x
         self.endY = player.y
-        self.velocity = player.velocity + 3
-        
+        self.speed = player.speed + 3
 
-    def isTouchingPlayer(self, player):
-        return player.y <= self.y + self.height and player.y + player.height >= self.y and player.x + player.width >= self.x and player.x <= self.x + self.width
-
+    def is_touching_player(self, player):
+        return (player.y <= self.y + self.height and
+                player.y + player.height >= self.y and
+                player.x + player.width >= self.x and
+                player.x <= self.x + self.width)

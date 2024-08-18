@@ -19,7 +19,7 @@
 #    Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
 
 
-#---------------------Import Libraries----------------------------#
+# ---------------------Import Libraries----------------------------
 import pygame
 import random
 import os
@@ -28,8 +28,7 @@ import cat_module
 import player_module
 import lasso_module
 
-#---------------------Global Variables and Game Window Setup-----------------------------#
-
+# ---------------------Global Variables and Game Window Setup-----------------------------
 
 # This sets up the game window.
 screenWidth = 500
@@ -41,44 +40,45 @@ pygame.display.set_caption("Cats Out of the Bag")
 
 score = 0
 
-#---------------------Functions---------------------------#
 
-def redrawGameWindow():
+# ---------------------Functions---------------------------#
+
+def redraw_game_window():
     window.blit(backgroundImage, (0, 0))
 
     player.draw(window)
 
     for cat in cats:
-
-        if player.caughtCat(cat):
+        if player.caught_cat(cat):
             cat.hit()
             cat.isCaught = True
 
         if cat.isCaught:
-            if cat.isTouchingPlayer(player):
+            if cat.is_touching_player(player):
                 cats.remove(cat)
             else:
-                cat.pullTowardPlayer(player)
+                cat.pull_toward_player(player)
 
         cat.draw(window)
-        cat.move(cat.endX, cat.endY)
+        cat.advance_on_path()
 
     pygame.display.update()
 
 
-#---------------------Instantiate Game Objects, Background Images, and Game Clock-------------------------#
+# ---------------------Instantiate Game Objects, Background Images, and Game Clock-------------------------#
 player = player_module.Player(0, 0)
 
 cats = []
 for i in range(10):
-    cats.append(cat_module.Cat(screenWidth // 2, screenHeight // 2, random.randint(0, screenWidth), random.randint(0, screenHeight)))
+    cats.append(cat_module.Cat(screenWidth // 2, screenHeight // 2, random.randint(0, screenWidth),
+                               random.randint(0, screenHeight)))
 
 # Load background image
 backgroundImage = pygame.image.load(os.path.join('..', 'bg.jpg'))
 
 clock = pygame.time.Clock()
 
-#---------------------Main Loop------------------------#
+# ---------------------Main Loop------------------------#
 run = True
 
 # Main loop
@@ -95,37 +95,25 @@ while run:
     if keys[pygame.K_SPACE] and not player.lassoIsThrown:
         player.throwLasso(window)
 
-    if keys[pygame.K_a] and player.x - player.velocity >= 0:
-        player.x -= player.velocity
-        player.left = True
-        player.right = False
-        player.up = False
-        player.down = False
+    if keys[pygame.K_a] and player.x - player.speed >= 0:
+        player.face("left")
+        player.move_forward()
 
     elif keys[pygame.K_d] and player.x + player.width < screenWidth:
-        player.x += player.velocity
-        player.left = False
-        player.right = True
-        player.up = False
-        player.down = False
+        player.face("right")
+        player.move_forward()
 
     elif keys[pygame.K_s] and player.y + player.height < screenHeight:
-        player.y += player.velocity
-        player.left = False
-        player.right = False
-        player.up = False 
-        player.down = True
+        player.face("down")
+        player.move_forward()
 
-    elif keys[pygame.K_w] and player.y - player.velocity >= 0:
-        player.y -= player.velocity
-        player.left = False
-        player.right = False
-        player.up = True
-        player.down = False
+    elif keys[pygame.K_w] and player.y - player.speed >= 0:
+        player.face("up")
+        player.move_forward()
 
     else:
-        player.walkCyclePosition = 0
+        player.walk_cycle_position = 0
 
-    redrawGameWindow()
+    redraw_game_window()
 
 pygame.quit()
